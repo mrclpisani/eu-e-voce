@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nosso Tempo</title>
+<style>
+  /* ============================================================
+     PALETA — preto, vermelho e verde · minimalista & romântico
+     ============================================================ */
+  :root {
+    --preto: #0b0708;
+    --vermelho: #e63946;
+    --vermelho-claro: #ff6b78;
+    --verde: #2ecc71;
+    --texto: #f4eeef;
+    --suave: #9a8d90;
+    --linha: rgba(255,255,255,.07);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    color: var(--texto);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(230,57,70,.10), transparent 60%),
+      var(--preto);
+    overflow-x: hidden;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Fundo com as fotos */
+  #fundo {
+    position: fixed; inset: 0; z-index: -2;
+    background-size: cover; background-position: center;
+    transition: opacity 1.6s ease; opacity: 0;
+    filter: contrast(1.03);
+  }
+  #fundo::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(900px 500px at 50% 0%, rgba(230,57,70,.14), transparent 55%),
+      linear-gradient(180deg, rgba(11,7,8,.55), rgba(11,7,8,.62));
+  }
+
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 90px 26px 110px;
+    position: relative;
+    text-align: center;
+  }
+
+  /* Cabeçalho */
+  header { margin-bottom: 80px; }
+  .coracao-topo {
+    font-size: 1.6rem;
+    color: var(--vermelho);
+    display: inline-block;
+    animation: bater 1.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px rgba(230,57,70,.5));
+    margin-bottom: 18px;
+  }
+  @keyframes bater {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.18); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.1); }
+  }
+  h1 {
+    font-size: clamp(2.4rem, 8vw, 4rem);
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: .5px;
+    line-height: 1.1;
+  }
+  h1 .e { color: var(--vermelho); font-style: normal; padding: 0 .12em; }
+  .subtitulo {
+    color: var(--suave);
+    margin-top: 22px;
+    font-size: 1.05rem;
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  /* Seções */
+  section { margin: 78px 0; }
+  .rotulo {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: .68rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--suave);
+    margin-bottom: 30px;
+  }
+  .rotulo::before, .rotulo::after {
+    content: "·"; color: var(--vermelho); margin: 0 12px; font-size: 1.1em;
+  }
+
+  /* Contador */
+  .destaque-dias {
+    font-size: clamp(3.4rem, 16vw, 6.5rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .destaque-dias #dias {
+    color: var(--vermelho);
+    text-shadow: 0 0 30px rgba(230,57,70,.35);
+  }
+  .destaque-dias .un {
+    display: block;
+    font-size: .2em;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--suave);
+    margin-top: 14px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .contador {
+    display: flex; justify-content: center;
+    gap: 28px; flex-wrap: wrap;
+    margin-top: 40px;
+  }
+  .bloco-tempo { min-width: 58px; }
+  .bloco-tempo .num { font-size: clamp(1.3rem, 5vw, 2rem); color: var(--texto); }
+  .bloco-tempo .rot {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: .58rem; letter-spacing: 2px; color: var(--suave);
+    margin-top: 8px; text-transform: uppercase;
+  }
+  .bloco-tempo + .bloco-tempo { border-left: 1px solid var(--linha); padding-left: 28px; }
+
+  /* Gráfico */
+  #grafico { width: 100%; height: auto; display: block; }
+  .legenda-amor {
+    margin-top: 18px; font-size: .95rem; font-style: italic;
+    color: var(--verde); line-height: 1.5;
+  }
+
+  /* Fotos */
+  .botao {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: transparent; color: var(--texto);
+    border: 1px solid var(--vermelho);
+    padding: 14px 30px; border-radius: 40px;
+    font-size: .78rem; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; cursor: pointer;
+    transition: background .2s, color .2s, box-shadow .2s;
+  }
+  .botao:hover { background: var(--vermelho); color: #fff; box-shadow: 0 0 24px rgba(230,57,70,.4); }
+  .dica { font-size: .85rem; color: var(--suave); margin-top: 16px; font-style: italic; }
+
+  /* Pergunta */
+  .pergunta {
+    font-size: clamp(1.5rem, 5vw, 2.1rem);
+    font-style: italic; font-weight: 400;
+    margin-bottom: 38px; line-height: 1.4;
+  }
+  .botoes-resposta { display: flex; gap: 18px; justify-content: center; align-items: center; flex-wrap: wrap; position: relative; }
+  #btnSim { border-color: var(--verde); }
+  #btnSim:hover { background: var(--verde); color: #06210f; box-shadow: 0 0 24px rgba(46,204,113,.4); }
+  #btnNao { border-color: var(--suave); transition: transform .15s ease, background .2s, color .2s; }
+  #btnNao:hover { background: var(--suave); color: var(--preto); box-shadow: none; }
+
+  .resposta-final {
+    display: none; margin-top: 34px;
+    font-size: 1.7rem; font-style: italic;
+    color: var(--verde);
+  }
+  .resposta-final span { color: var(--vermelho); }
+
+  /* Corações caindo */
+  .coracao {
+    position: fixed; top: -40px; z-index: 50;
+    pointer-events: none; animation: cair linear forwards;
+  }
+  @keyframes cair { to { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
+
+  /* Divisor com coração */
+  .divisor {
+    display: flex; align-items: center; justify-content: center;
+    gap: 16px; color: var(--vermelho); opacity: .6; margin: 0 auto;
+  }
+  .divisor::before, .divisor::after {
+    content: ""; width: 60px; height: 1px; background: var(--linha);
+  }
+
+  footer {
+    color: var(--suave); font-size: .82rem; font-style: italic;
+    margin-top: 90px;
+  }
+</style>
+</head>
+<body>
+
+<div id="fundo"></div>
+
+<div class="container">
+
+  <!-- ============================================================
+       👇 EDITE AQUI: nomes e mensagem
+       ============================================================ -->
+  <header>
+    <div class="coracao-topo">♥</div>
+    <h1 id="titulo">Eu <span class="e">&amp;</span> Você</h1>
+    <p class="subtitulo" id="subtitulo">O tempo ao seu lado<br>é o meu lugar favorito</p>
+  </header>
+
+  <!-- CONTADOR -->
+  <section>
+    <div class="destaque-dias"><span id="dias">0</span><span class="un">dias juntos</span></div>
+    <div class="contador">
+      <div class="bloco-tempo"><div class="num" id="anos">0</div><div class="rot">Anos</div></div>
+      <div class="bloco-tempo"><div class="num" id="meses">0</div><div class="rot">Meses</div></div>
+      <div class="bloco-tempo"><div class="num" id="horas">0</div><div class="rot">Horas</div></div>
+      <div class="bloco-tempo"><div class="num" id="minutos">0</div><div class="rot">Min</div></div>
+      <div class="bloco-tempo"><div class="num" id="segundos">0</div><div class="rot">Seg</div></div>
+    </div>
+  </section>
+
+  <div class="divisor">♥</div>
+
+  <!-- GRÁFICO -->
+  <section>
+    <svg id="grafico" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="legenda-amor" id="legendaAmor">E só cresce.</div>
+  </section>
+
+  <div class="divisor">♥</div>
+
+  <!-- PERGUNTA -->
+  <section>
+    <!-- 👇 EDITE AQUI a pergunta -->
+    <p class="pergunta" id="textoPergunta">Quer namorar comigo?</p>
+    <div class="botoes-resposta">
+      <button class="botao" id="btnSim" onclick="responderSim()">Sim</button>
+      <button class="botao" id="btnNao">Não</button>
+    </div>
+    <div class="resposta-final" id="respostaFinal">Eu sabia. <span>Te amo.</span></div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   👇👇👇  CONFIGURAÇÃO PRINCIPAL — EDITE ESTAS LINHAS  👇👇👇
+   ============================================================ */
+
+  // Data em que vocês se conheceram (ANO, MÊS, DIA, HORA, MINUTO)
+  // ATENÇÃO: o mês começa do 0! Janeiro = 0, Fevereiro = 1, ... Dezembro = 11
+  const DATA_QUE_CONHECI = new Date(2023, 0, 1, 12, 0, 0); // exemplo: 01/01/2023 12:00
+
+/* ============================================================
+   👆👆👆  FIM DA CONFIGURAÇÃO  👆👆👆
+   ============================================================ */
+
+
+/* ---------- CONTADOR ---------- */
+function atualizarContador() {
+  const agora = new Date();
+  let diff = agora - DATA_QUE_CONHECI;
+  if (diff < 0) diff = 0;
+
+  const seg = Math.floor(diff / 1000);
+  const totalDias = Math.floor(seg / 86400);
+
+  document.getElementById('dias').textContent = totalDias.toLocaleString('pt-BR');
+  document.getElementById('anos').textContent = Math.floor(totalDias / 365);
+  document.getElementById('meses').textContent = Math.floor(totalDias / 30.4375);
+  document.getElementById('horas').textContent = Math.floor(seg / 3600) % 24;
+  document.getElementById('minutos').textContent = Math.floor(seg / 60) % 60;
+  document.getElementById('segundos').textContent = seg % 60;
+}
+atualizarContador();
+setInterval(atualizarContador, 1000);
+
+
+/* ---------- GRÁFICO DO AMOR (baseado na data real) ---------- */
+(function desenharGrafico() {
+  const svg = document.getElementById('grafico');
+  const NS = 'http://www.w3.org/2000/svg';
+  const W = 600, H = 300, pad = 38;
+  const MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+  function fmtData(d) {
+    return d.getDate().toString().padStart(2, '0') + '/' + MES[d.getMonth()] + '/' + d.getFullYear();
+  }
+  function rotuloCurto(d) { return MES[d.getMonth()] + '/' + (d.getFullYear() % 100); }
+
+  const inicio = DATA_QUE_CONHECI.getTime();
+  const hoje = Date.now();
+  const totalDias = Math.max(1, (hoje - inicio) / 86400000);
+
+  const pontos = [];
+  const n = 40;
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const x = pad + t * (W - pad * 1.5);
+    const valor = Math.pow(t, 1.8);
+    const y = (H - pad) - valor * (H - pad * 2);
+    pontos.push([x, y]);
+  }
+
+  function linha(x1, y1, x2, y2, cor, w, tracejado) {
+    const el = document.createElementNS(NS, 'line');
+    el.setAttribute('x1', x1); el.setAttribute('y1', y1);
+    el.setAttribute('x2', x2); el.setAttribute('y2', y2);
+    el.setAttribute('stroke', cor); el.setAttribute('stroke-width', w);
+    if (tracejado) el.setAttribute('stroke-dasharray', '3 4');
+    svg.appendChild(el);
+  }
+  function texto(x, y, t, cor, anchor, tam) {
+    const el = document.createElementNS(NS, 'text');
+    el.setAttribute('x', x); el.setAttribute('y', y);
+    el.setAttribute('fill', cor); el.setAttribute('font-size', tam || 12);
+    el.setAttribute('font-family', 'Helvetica Neue, Arial, sans-serif');
+    el.setAttribute('letter-spacing', '.5');
+    el.setAttribute('text-anchor', anchor || 'start');
+    el.textContent = t; svg.appendChild(el);
+  }
+
+  linha(pad, H - pad, W - 10, H - pad, 'rgba(255,255,255,.18)', 1);
+  linha(pad, 12, pad, H - pad, 'rgba(255,255,255,.18)', 1);
+  texto(pad + 4, 22, 'AMOR', '#2ecc71', 'start', 11);
+
+  const divs = 4;
+  for (let i = 0; i <= divs; i++) {
+    const t = i / divs;
+    const x = pad + t * (W - pad * 1.5);
+    const dataPt = new Date(inicio + t * (hoje - inicio));
+    linha(x, H - pad, x, H - pad + 4, 'rgba(255,255,255,.25)', 1);
+    texto(x, H - pad + 20, rotuloCurto(dataPt), '#9a8d90', 'middle', 10);
+  }
+
+  const dArea = 'M' + pad + ' ' + (H - pad) + ' ' +
+    pontos.map(p => 'L' + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ') +
+    ' L' + pontos[pontos.length - 1][0].toFixed(1) + ' ' + (H - pad) + ' Z';
+  const area = document.createElementNS(NS, 'path');
+  area.setAttribute('d', dArea);
+  area.setAttribute('fill', 'rgba(46,204,113,.12)');
+  svg.appendChild(area);
+
+  const d = pontos.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const path = document.createElementNS(NS, 'path');
+  path.setAttribute('d', d);
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', '#2ecc71');
+  path.setAttribute('stroke-width', '3');
+  path.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(path);
+
+  const len = path.getTotalLength();
+  path.style.strokeDasharray = len;
+  path.style.strokeDashoffset = len;
+  path.style.transition = 'stroke-dashoffset 2.4s ease-out';
+  requestAnimationFrame(() => { path.style.strokeDashoffset = '0'; });
+
+  const fim = pontos[pontos.length - 1];
+  linha(fim[0], fim[1], fim[0], H - pad, 'rgba(230,57,70,.4)', 1, true);
+  const dot = document.createElementNS(NS, 'circle');
+  dot.setAttribute('cx', fim[0]); dot.setAttribute('cy', fim[1]);
+  dot.setAttribute('r', '5'); dot.setAttribute('fill', '#e63946');
+  dot.setAttribute('opacity', '0');
+  dot.style.transition = 'opacity .8s ease 2.2s';
+  svg.appendChild(dot);
+  texto(fim[0] - 6, fim[1] - 10, 'hoje', '#e63946', 'end', 11);
+  requestAnimationFrame(() => { dot.setAttribute('opacity', '1'); });
+
+  const dias = Math.floor(totalDias);
+  document.getElementById('legendaAmor').textContent =
+    'Crescendo desde ' + fmtData(DATA_QUE_CONHECI) + ' — já são ' +
+    dias.toLocaleString('pt-BR') + ' dias.';
+})();
+
+
+/* ---------- FOTOS DE FUNDO ---------- */
+
+  // 📷 FOTOS PADRÃO — passam sozinhas sempre que o site abre.
+  //    Para trocar: coloque/renomeie os arquivos na pasta "imagens"
+  //    e ajuste a lista abaixo.
+  const FOTOS_PADRAO = [
+    'imagens/foto1.jpeg',
+    'imagens/foto2.jpeg',
+    'imagens/foto3.jpeg',
+    'imagens/foto4.jpeg',
+    'imagens/foto5.jpeg',
+    'imagens/foto6.jpeg',
+    'imagens/foto7.jpeg',
+    'imagens/foto8.jpeg',
+    'imagens/foto9.jpeg',
+    'imagens/foto10.jpeg'
+  ];
+
+let fotos = [];
+let fotoAtual = 0;
+
+function iniciarSlideshow() {
+  if (!fotos.length) return;
+  fotoAtual = 0;
+  trocarFundo();
+  clearInterval(window._slide);
+  if (fotos.length > 1) {
+    window._slide = setInterval(() => {
+      fotoAtual = (fotoAtual + 1) % fotos.length;
+      trocarFundo();
+    }, 5000);
+  }
+}
+
+// Embaralha pra abrir numa ordem diferente cada vez (opcional)
+function embaralhar(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Ao abrir o site, já começa com as fotos padrão
+fotos = embaralhar(FOTOS_PADRAO);
+iniciarSlideshow();
+
+function trocarFundo() {
+  const fundo = document.getElementById('fundo');
+  fundo.style.opacity = '0';
+  setTimeout(() => {
+    fundo.style.backgroundImage = `url('${fotos[fotoAtual]}')`;
+    fundo.style.opacity = '1';
+  }, 400);
+}
+
+
+/* ---------- PERGUNTA SIM / NÃO ---------- */
+function responderSim() {
+  document.getElementById('respostaFinal').style.display = 'block';
+  chuvaDeCoracoes();
+}
+
+const btnNao = document.getElementById('btnNao');
+function fugir() {
+  const x = (Math.random() - 0.5) * 260;
+  const y = (Math.random() - 0.5) * 160;
+  btnNao.style.transform = `translate(${x}px, ${y}px)`;
+}
+btnNao.addEventListener('mouseover', fugir);
+btnNao.addEventListener('click', function (e) { e.preventDefault(); fugir(); });
+
+function chuvaDeCoracoes() {
+  const cores = ['#e63946', '#2ecc71', '#fff'];
+  for (let i = 0; i < 50; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'coracao';
+      c.textContent = '♥';
+      c.style.color = cores[Math.floor(Math.random() * cores.length)];
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.fontSize = (16 + Math.random() * 24) + 'px';
+      c.style.animationDuration = (3 + Math.random() * 3) + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 6500);
+    }, i * 80);
+  }
+}
+</script>
+</body>
+</html>
