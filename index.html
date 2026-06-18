@@ -154,6 +154,16 @@
       text-shadow: 0 0 30px rgba(230, 57, 70, .35);
     }
 
+    .destaque-dias .dias-un {
+      font-size: .26em;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--texto);
+      margin-left: .4em;
+      vertical-align: middle;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
     .destaque-dias .un {
       display: block;
       font-size: .2em;
@@ -341,7 +351,7 @@
     </header>
 
     <section>
-      <div class="destaque-dias"><span id="dias">0</span><span class="un">A quanto tempo você é minha pessoa
+      <div class="destaque-dias"><span id="dias">0</span><span class="dias-un">dias</span><span class="un">A quanto tempo você é minha pessoa
           favorita</span></div>
       <div class="contador">
         <div class="bloco-tempo">
@@ -457,16 +467,18 @@
 
       linha(pad, H - pad, W - 10, H - pad, 'rgba(255,255,255,.18)', 1);
       linha(pad, 12, pad, H - pad, 'rgba(255,255,255,.18)', 1);
-      texto(pad + 4, 22, 'AMOR', '#2ecc71', 'start', 11);
 
-      const divs = 4;
+      const diasInt = Math.round(totalDias);
+      const divs = Math.min(4, Math.max(1, diasInt));
       for (let i = 0; i <= divs; i++) {
         const t = i / divs;
         const x = pad + t * (W - pad * 1.5);
-        const dataPt = new Date(inicio + t * (hoje - inicio));
+        const diaPt = Math.round(t * diasInt);
         linha(x, H - pad, x, H - pad + 4, 'rgba(255,255,255,.25)', 1);
-        texto(x, H - pad + 20, rotuloCurto(dataPt), '#9a8d90', 'middle', 10);
+        texto(x, H - pad + 20, diaPt, '#9a8d90', 'middle', 10);
       }
+      // legenda do eixo do tempo
+      texto(pad + (W - pad * 1.5) / 2, H - pad + 34, 'dias', '#9a8d90', 'middle', 11);
 
       const dArea = 'M' + pad + ' ' + (H - pad) + ' ' +
         pontos.map(p => 'L' + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ') +
