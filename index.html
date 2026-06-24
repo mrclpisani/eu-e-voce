@@ -43,6 +43,8 @@
       inset: 0;
       z-index: -2;
       display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
       gap: 2px;
       background: #0b0708;
       transition: opacity 1.6s ease;
@@ -50,11 +52,25 @@
       filter: contrast(1.03);
     }
 
+    @media (max-width: 640px) {
+      #fundo {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+      }
+    }
+
     #fundo .tile {
+      position: relative;
+      overflow: hidden;
+    }
+
+    #fundo .camada {
+      position: absolute;
+      inset: 0;
       background-size: cover;
       background-position: center;
       opacity: 1;
-      transition: opacity .6s ease;
+      transition: opacity 1.4s ease;
     }
 
     #fundo::after {
@@ -578,50 +594,57 @@
       'imagens/foto13.jpeg', 'imagens/foto14.jpeg', 'imagens/foto15.jpeg'
     ];
 
-    /* ---------- FUNDO EM MOSAICO (várias fotos ao mesmo tempo, trocando aleatoriamente) ---------- */
+    /* ---------- FUNDO EM MOSAICO (6 fotos por vez, sem repetir, transição fluida) ---------- */
     (function fundoMosaico() {
       const fundo = document.getElementById('fundo');
-      const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+      const N = 6;          // fotos visíveis ao mesmo tempo
+      let atuais = [];      // fotos visíveis agora (sem repetição entre elas)
       let tiles = [];
 
+      function novaCamadaEl(src, visivel) {
+        const c = document.createElement('div');
+        c.className = 'camada';
+        c.style.backgroundImage = "url('" + src + "')";
+        c.style.opacity = visivel ? '1' : '0';
+        return c;
+      }
+
       function construir() {
-        const cols = Math.max(2, Math.round(window.innerWidth / 300));
-        const rows = Math.max(2, Math.round(window.innerHeight / 300));
-        fundo.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
-        fundo.style.gridTemplateRows = 'repeat(' + rows + ', 1fr)';
         fundo.innerHTML = '';
         tiles = [];
-        const baralho = embaralhar(FOTOS_PADRAO);
-        const total = cols * rows;
-        for (let i = 0; i < total; i++) {
-          const t = document.createElement('div');
-          t.className = 'tile';
-          t.style.backgroundImage = "url('" + baralho[i % baralho.length] + "')";
-          fundo.appendChild(t);
-          tiles.push(t);
+        atuais = embaralhar(FOTOS_PADRAO).slice(0, N);
+        for (let i = 0; i < N; i++) {
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          tile.appendChild(novaCamadaEl(atuais[i], true));
+          fundo.appendChild(tile);
+          tiles.push(tile);
         }
         fundo.style.opacity = '1';
       }
 
-      // a cada intervalo, uma célula aleatória troca por outra foto aleatória
+      // troca uma célula por uma foto que NÃO está visível em nenhuma outra
       function trocarUma() {
         if (!tiles.length) return;
-        const t = rand(tiles);
-        t.style.opacity = '0';
+        const i = Math.floor(Math.random() * N);
+        const disponiveis = FOTOS_PADRAO.filter(f => !atuais.includes(f));
+        if (!disponiveis.length) return;
+        const nova = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+        atuais[i] = nova;
+
+        const tile = tiles[i];
+        const camada = novaCamadaEl(nova, false);
+        tile.appendChild(camada);
+        // crossfade: a foto nova surge suavemente por cima da antiga
+        requestAnimationFrame(() => requestAnimationFrame(() => { camada.style.opacity = '1'; }));
+        // remove as camadas antigas depois da transição
         setTimeout(() => {
-          t.style.backgroundImage = "url('" + rand(FOTOS_PADRAO) + "')";
-          t.style.opacity = '1';
-        }, 500);
+          while (tile.childElementCount > 1) tile.removeChild(tile.firstChild);
+        }, 1600);
       }
 
       construir();
-      setInterval(trocarUma, 1600);
-
-      let resizeT;
-      window.addEventListener('resize', () => {
-        clearTimeout(resizeT);
-        resizeT = setTimeout(construir, 300);
-      });
+      setInterval(trocarUma, 2600);
     })();
 
 
