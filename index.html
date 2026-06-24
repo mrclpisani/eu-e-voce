@@ -4,6 +4,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Força não usar cache: sempre buscar a versão mais nova -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Nosso Tempo</title>
   <style>
     :root {
@@ -452,6 +456,17 @@
   </div>
 
   <script>
+    /* ---------- LIMPAR CACHE SEMPRE QUE ABRIR O SITE ---------- */
+    // apaga qualquer cache guardado (Cache Storage / PWA) e service workers antigos
+    if ('caches' in window) {
+      caches.keys().then(function (chaves) { chaves.forEach(function (c) { caches.delete(c); }); }).catch(function () { });
+    }
+    if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+      navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); }).catch(function () { });
+    }
+    // valor único por visita para forçar imagens sempre novas (cache-busting)
+    const CACHE_BUST = '?v=' + Date.now();
+
     const DATA_QUE_CONHECI = new Date(2026, 5, 11, 10, 30, 0);
     // Data em que ela disse que te ama (ANO, MÊS[jan=0], DIA, HORA, MIN)
     const DATA_QUE_ME_AMA = new Date(2026, 5, 23, 17, 34, 0);
@@ -624,7 +639,7 @@
       function novaCamadaEl(src, visivel) {
         const c = document.createElement('div');
         c.className = 'camada';
-        c.style.backgroundImage = "url('" + src + "')";
+        c.style.backgroundImage = "url('" + src + CACHE_BUST + "')";
         c.style.opacity = visivel ? '1' : '0';
         return c;
       }
