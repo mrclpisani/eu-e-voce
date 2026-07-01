@@ -312,32 +312,47 @@
       100% { transform: translate(0, 0) skew(0deg); filter: none; opacity: 1; }
     }
 
+    /* Ao "quebrar", a revelação cobre a tela inteira — só foto + frase grande, nada mais */
     .revelacao {
       display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      padding: 40px;
+      background: var(--preto);
+      text-align: center;
       opacity: 0;
-      transform: scale(.94);
-      transition: opacity 1s ease, transform 1s ease;
+      transition: opacity 1.2s ease;
     }
 
     .revelacao.mostrar {
       opacity: 1;
-      transform: scale(1);
     }
 
     .revelacao img {
       width: 100%;
-      max-width: 360px;
+      max-width: 380px;
       border-radius: 10px;
       border: 1px solid var(--vermelho);
-      box-shadow: 0 0 40px rgba(230, 57, 70, .35);
+      box-shadow: 0 0 50px rgba(230, 57, 70, .4);
+      transform: scale(.92);
+      transition: transform 1.2s ease;
+    }
+
+    .revelacao.mostrar img {
+      transform: scale(1);
     }
 
     .revelacao p {
-      margin-top: 24px;
-      font-size: 1.3rem;
+      margin-top: 26px;
+      font-size: clamp(1.4rem, 5vw, 1.8rem);
       font-style: italic;
       color: var(--verde);
       line-height: 1.6;
+      max-width: 480px;
     }
 
     .revelacao .coracaoFinal {
@@ -551,12 +566,12 @@
     <!-- PERGUNTA -->
     <section>
       <!-- 👇 EDITE AQUI a pergunta -->
-      <p class="pergunta" id="textoPergunta">Você me perdoa por ser assim?</p>
+      <p class="pergunta" id="textoPergunta">Eu te amo sabia?</p>
       <div class="botoes-resposta">
         <button class="botao" id="btnSim" onclick="responderSim()">Sim</button>
         <button class="botao" id="btnNao">Não</button>
       </div>
-      <div class="resposta-final" id="respostaFinal">Você sabia <span>que eu te amo?</span></div>
+      <div class="resposta-final" id="respostaFinal">Você me torna <span>a pessoa mais feliz do mundo todos os dias</span></div>
     </section>
   </div>
 
@@ -620,7 +635,7 @@
     setInterval(atualizarContador, 1000);
 
 
-    /* ---------- CONTAGEM DE APAIXONAMENTOS + ERRO FALSO + QUEBRA DE TELA ---------- */
+    /* ---------- CONTAGEM DE APAIXONAMENTOS + ERRO FALSO + QUEBRA DE TELA (em loop) ---------- */
     (function contagemApaixonado() {
       const ALVO = 847329; // valor fictício e exagerado — impossível de contar de verdade
       const numEl = document.getElementById('contagemNumero');
@@ -629,26 +644,29 @@
       const overlay = document.getElementById('glitchOverlay');
       const revelacao = document.getElementById('revelacao');
 
-      let valor = 1;
-      let passo = 1;
-      let atraso = 260;
+      function iniciarCiclo() {
+        let valor = 1;
+        let passo = 1;
+        let atraso = 260;
 
-      function tick() {
-        numEl.textContent = valor.toLocaleString('pt-BR');
-        if (valor >= ALVO) {
-          setTimeout(mostrarErro, 900);
-          return;
+        function tick() {
+          numEl.textContent = valor.toLocaleString('pt-BR');
+          if (valor >= ALVO) {
+            setTimeout(mostrarErro, 900);
+            return;
+          }
+          valor = Math.min(ALVO, Math.round(valor + passo));
+          passo *= 1.16;                 // a contagem acelera a cada passo
+          atraso = Math.max(10, atraso * 0.90); // e a velocidade também aumenta
+          setTimeout(tick, atraso);
         }
-        valor = Math.min(ALVO, Math.round(valor + passo));
-        passo *= 1.16;                 // a contagem acelera a cada passo
-        atraso = Math.max(10, atraso * 0.90); // e a velocidade também aumenta
-        setTimeout(tick, atraso);
+        tick();
       }
 
       function mostrarErro() {
         bloco.style.display = 'none';
         erro.style.display = 'block';
-        setTimeout(quebrarTela, 2400);
+        setTimeout(quebrarTela, 4200); // erro fica mais tempo na tela
       }
 
       function quebrarTela() {
@@ -659,12 +677,23 @@
           container.classList.remove('tela-quebrada');
           overlay.classList.remove('ativo');
           erro.style.display = 'none';
-          revelacao.style.display = 'block';
+          // cobre a tela inteira: só a foto e a frase grande ficam visíveis
+          revelacao.style.display = 'flex';
           requestAnimationFrame(() => requestAnimationFrame(() => revelacao.classList.add('mostrar')));
+          setTimeout(reiniciarCiclo, 5000); // espera 5s mostrando a foto, depois recomeça tudo
         }, 900);
       }
 
-      tick();
+      function reiniciarCiclo() {
+        revelacao.classList.remove('mostrar');
+        setTimeout(() => {
+          revelacao.style.display = 'none';
+          bloco.style.display = '';
+          iniciarCiclo();
+        }, 1200); // aguarda o fade-out da revelação antes de recomeçar
+      }
+
+      iniciarCiclo();
     })();
 
 
