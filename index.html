@@ -177,7 +177,7 @@
       letter-spacing: -1px;
     }
 
-    .destaque-dias #dias {
+    .destaque-dias .numero-grande {
       color: var(--vermelho);
       text-shadow: 0 0 30px rgba(230, 57, 70, .35);
     }
@@ -233,18 +233,115 @@
       padding-left: 28px;
     }
 
-    #grafico {
-      width: 100%;
-      height: auto;
-      display: block;
+    /* ---------- Contagem de apaixonamentos + erro falso + quebra de tela ---------- */
+    .erro-falso {
+      display: none;
+      font-family: 'Courier New', monospace;
+      background: #170606;
+      border: 1px solid var(--vermelho);
+      color: var(--vermelho-claro);
+      padding: 22px 20px;
+      border-radius: 4px;
+      text-align: left;
+      font-size: .95rem;
+      letter-spacing: .3px;
+      line-height: 1.6;
+      box-shadow: 0 0 30px rgba(230, 57, 70, .25);
+      animation: erroFlicker 2.4s steps(8, end) infinite;
     }
 
-    .legenda-amor {
-      margin-top: 18px;
-      font-size: .95rem;
+    .erro-falso::before {
+      content: "> ";
+      color: var(--verde);
+    }
+
+    .erro-falso::after {
+      content: "_";
+      animation: cursorBlink 1s steps(1) infinite;
+    }
+
+    @keyframes cursorBlink {
+      50% { opacity: 0; }
+    }
+
+    @keyframes erroFlicker {
+      0%, 100% { opacity: 1; }
+      42% { opacity: 1; }
+      43% { opacity: .35; }
+      44% { opacity: 1; }
+      88% { opacity: 1; }
+      89% { opacity: .5; }
+      90% { opacity: 1; }
+    }
+
+    #glitchOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
+      opacity: 0;
+      background: repeating-linear-gradient(0deg, rgba(230, 57, 70, .18) 0 2px, transparent 2px 4px);
+      mix-blend-mode: screen;
+    }
+
+    #glitchOverlay.ativo {
+      opacity: 1;
+      animation: flickerOverlay .12s steps(2, end) infinite;
+    }
+
+    @keyframes flickerOverlay {
+      0% { opacity: .9; }
+      50% { opacity: .3; }
+      100% { opacity: .85; }
+    }
+
+    .tela-quebrada {
+      animation: quebrar .9s steps(2, end);
+    }
+
+    @keyframes quebrar {
+      0% { transform: translate(0, 0) skew(0deg); filter: none; }
+      10% { transform: translate(-6px, 3px) skew(-2deg); filter: hue-rotate(20deg) contrast(1.4); }
+      20% { transform: translate(5px, -4px) skew(2deg); filter: invert(.15) saturate(2); }
+      30% { transform: translate(-4px, 2px) skew(-1deg); filter: none; }
+      40% { transform: translate(6px, -2px) skew(3deg); filter: hue-rotate(-30deg); }
+      50% { transform: translate(-8px, 4px) skew(-3deg); filter: contrast(2) brightness(1.3); opacity: .6; }
+      60% { transform: translate(4px, -3px) skew(1deg); filter: invert(.3); }
+      70% { transform: translate(-3px, 2px) skew(-2deg); filter: none; opacity: 1; }
+      85% { transform: translate(2px, -1px) skew(1deg); }
+      100% { transform: translate(0, 0) skew(0deg); filter: none; opacity: 1; }
+    }
+
+    .revelacao {
+      display: none;
+      opacity: 0;
+      transform: scale(.94);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+
+    .revelacao.mostrar {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .revelacao img {
+      width: 100%;
+      max-width: 360px;
+      border-radius: 10px;
+      border: 1px solid var(--vermelho);
+      box-shadow: 0 0 40px rgba(230, 57, 70, .35);
+    }
+
+    .revelacao p {
+      margin-top: 24px;
+      font-size: 1.3rem;
       font-style: italic;
       color: var(--verde);
-      line-height: 1.5;
+      line-height: 1.6;
+    }
+
+    .revelacao .coracaoFinal {
+      color: var(--vermelho);
     }
 
     .botao {
@@ -370,6 +467,7 @@
 <body>
 
   <div id="fundo"></div>
+  <div id="glitchOverlay"></div>
 
   <div class="container">
     <header>
@@ -379,7 +477,7 @@
     </header>
 
     <section>
-      <div class="destaque-dias"><span id="dias">0</span><span class="dias-un" id="diasUn">dias</span><span
+      <div class="destaque-dias"><span id="dias" class="numero-grande">0</span><span class="dias-un" id="diasUn">dias</span><span
           class="un">Há quanto tempo você é minha pessoa favorita</span></div>
       <div class="contador">
         <div class="bloco-tempo">
@@ -408,7 +506,7 @@
     <div class="divisor">♥</div>
 
     <section>
-      <div class="destaque-dias"><span id="diasAma">0</span><span class="dias-un" id="diasUnAma">dias</span><span
+      <div class="destaque-dias"><span id="diasAma" class="numero-grande">0</span><span class="dias-un" id="diasUnAma">dias</span><span
           class="un">Há quanto tempo você me fez a pessoa mais feliz do mundo</span></div>
       <div class="contador">
         <div class="bloco-tempo">
@@ -437,8 +535,15 @@
     <div class="divisor">♥</div>
 
     <section>
-      <svg id="grafico" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="legenda-amor" id="legendaAmor">E só cresce.</div>
+      <div class="destaque-dias" id="blocoContagem"><span id="contagemNumero" class="numero-grande">1</span><span
+          class="un">vezes que me apaixonei pelo seu sorriso</span></div>
+
+      <div class="erro-falso" id="erroFalso">ERROR 404: cannot count how many times i love you</div>
+
+      <div class="revelacao" id="revelacao">
+        <img src="imagens/favorita.jpeg" alt="Você sorrindo" onerror="this.style.display='none'" />
+        <p>Eu te amo. <span class="coracaoFinal">♥</span><br>Essa é minha foto favorita de você sorrindo.</p>
+      </div>
     </section>
 
     <div class="divisor">♥</div>
@@ -515,103 +620,54 @@
     setInterval(atualizarContador, 1000);
 
 
-    (function desenharGrafico() {
-      const svg = document.getElementById('grafico');
-      const NS = 'http://www.w3.org/2000/svg';
-      const W = 600, H = 300, pad = 38;
-      const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    /* ---------- CONTAGEM DE APAIXONAMENTOS + ERRO FALSO + QUEBRA DE TELA ---------- */
+    (function contagemApaixonado() {
+      const ALVO = 847329; // valor fictício e exagerado — impossível de contar de verdade
+      const numEl = document.getElementById('contagemNumero');
+      const bloco = document.getElementById('blocoContagem');
+      const erro = document.getElementById('erroFalso');
+      const overlay = document.getElementById('glitchOverlay');
+      const revelacao = document.getElementById('revelacao');
 
-      function fmtData(d) {
-        return d.getDate().toString().padStart(2, '0') + '/' + MES[d.getMonth()] + '/' + d.getFullYear();
-      }
-      function rotuloCurto(d) { return MES[d.getMonth()] + '/' + (d.getFullYear() % 100); }
+      let valor = 1;
+      let passo = 1;
+      let atraso = 260;
 
-      const inicio = DATA_QUE_CONHECI.getTime();
-      const hoje = Date.now();
-      const totalDias = Math.max(1, (hoje - inicio) / 86400000);
-
-      const pontos = [];
-      const n = 40;
-      for (let i = 0; i <= n; i++) {
-        const t = i / n;
-        const x = pad + t * (W - pad * 1.5);
-        const valor = Math.pow(t, 1.8);
-        const y = (H - pad) - valor * (H - pad * 2);
-        pontos.push([x, y]);
-      }
-
-      function linha(x1, y1, x2, y2, cor, w, tracejado) {
-        const el = document.createElementNS(NS, 'line');
-        el.setAttribute('x1', x1); el.setAttribute('y1', y1);
-        el.setAttribute('x2', x2); el.setAttribute('y2', y2);
-        el.setAttribute('stroke', cor); el.setAttribute('stroke-width', w);
-        if (tracejado) el.setAttribute('stroke-dasharray', '3 4');
-        svg.appendChild(el);
-      }
-      function texto(x, y, t, cor, anchor, tam) {
-        const el = document.createElementNS(NS, 'text');
-        el.setAttribute('x', x); el.setAttribute('y', y);
-        el.setAttribute('fill', cor); el.setAttribute('font-size', tam || 12);
-        el.setAttribute('font-family', 'Helvetica Neue, Arial, sans-serif');
-        el.setAttribute('letter-spacing', '.5');
-        el.setAttribute('text-anchor', anchor || 'start');
-        el.textContent = t; svg.appendChild(el);
+      function tick() {
+        numEl.textContent = valor.toLocaleString('pt-BR');
+        if (valor >= ALVO) {
+          setTimeout(mostrarErro, 900);
+          return;
+        }
+        valor = Math.min(ALVO, Math.round(valor + passo));
+        passo *= 1.16;                 // a contagem acelera a cada passo
+        atraso = Math.max(10, atraso * 0.90); // e a velocidade também aumenta
+        setTimeout(tick, atraso);
       }
 
-      linha(pad, H - pad, W - 10, H - pad, 'rgba(255,255,255,.18)', 1);
-      linha(pad, 12, pad, H - pad, 'rgba(255,255,255,.18)', 1);
-
-      const diasInt = Math.round(totalDias);
-      const divs = Math.min(4, Math.max(1, diasInt));
-      for (let i = 0; i <= divs; i++) {
-        const t = i / divs;
-        const x = pad + t * (W - pad * 1.5);
-        const diaPt = Math.round(t * diasInt);
-        linha(x, H - pad, x, H - pad + 4, 'rgba(255,255,255,.25)', 1);
-        texto(x, H - pad + 20, diaPt, '#9a8d90', 'middle', 10);
+      function mostrarErro() {
+        bloco.style.display = 'none';
+        erro.style.display = 'block';
+        setTimeout(quebrarTela, 2400);
       }
-      // legenda do eixo do tempo
-      texto(pad + (W - pad * 1.5) / 2, H - pad + 34, 'dias', '#9a8d90', 'middle', 11);
 
-      const dArea = 'M' + pad + ' ' + (H - pad) + ' ' +
-        pontos.map(p => 'L' + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ') +
-        ' L' + pontos[pontos.length - 1][0].toFixed(1) + ' ' + (H - pad) + ' Z';
-      const area = document.createElementNS(NS, 'path');
-      area.setAttribute('d', dArea);
-      area.setAttribute('fill', 'rgba(46,204,113,.12)');
-      svg.appendChild(area);
+      function quebrarTela() {
+        const container = document.querySelector('.container');
+        container.classList.add('tela-quebrada');
+        overlay.classList.add('ativo');
+        setTimeout(() => {
+          container.classList.remove('tela-quebrada');
+          overlay.classList.remove('ativo');
+          erro.style.display = 'none';
+          revelacao.style.display = 'block';
+          requestAnimationFrame(() => requestAnimationFrame(() => revelacao.classList.add('mostrar')));
+        }, 900);
+      }
 
-      const d = pontos.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
-      const path = document.createElementNS(NS, 'path');
-      path.setAttribute('d', d);
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', '#2ecc71');
-      path.setAttribute('stroke-width', '3');
-      path.setAttribute('stroke-linecap', 'round');
-      svg.appendChild(path);
-
-      const len = path.getTotalLength();
-      path.style.strokeDasharray = len;
-      path.style.strokeDashoffset = len;
-      path.style.transition = 'stroke-dashoffset 2.4s ease-out';
-      requestAnimationFrame(() => { path.style.strokeDashoffset = '0'; });
-
-      const fim = pontos[pontos.length - 1];
-      linha(fim[0], fim[1], fim[0], H - pad, 'rgba(230,57,70,.4)', 1, true);
-      const dot = document.createElementNS(NS, 'circle');
-      dot.setAttribute('cx', fim[0]); dot.setAttribute('cy', fim[1]);
-      dot.setAttribute('r', '5'); dot.setAttribute('fill', '#e63946');
-      dot.setAttribute('opacity', '0');
-      dot.style.transition = 'opacity .8s ease 2.2s';
-      svg.appendChild(dot);
-      texto(fim[0] - 6, fim[1] - 10, 'hoje', '#e63946', 'end', 11);
-      requestAnimationFrame(() => { dot.setAttribute('opacity', '1'); });
-
-      const dias = Math.floor(totalDias);
-      document.getElementById('legendaAmor').textContent =
-        'Crescendo desde ' + fmtData(DATA_QUE_CONHECI) + ' — já são ' +
-        dias.toLocaleString('pt-BR') + ' dias.';
+      tick();
     })();
+
+
     function embaralhar(arr) {
       const a = arr.slice();
       for (let i = a.length - 1; i > 0; i--) {
@@ -626,7 +682,11 @@
       'imagens/foto4.jpeg', 'imagens/foto5.jpeg', 'imagens/foto6.jpeg',
       'imagens/foto7.jpeg', 'imagens/foto8.jpeg', 'imagens/foto9.jpeg',
       'imagens/foto10.jpeg', 'imagens/foto11.jpeg', 'imagens/foto12.jpeg',
-      'imagens/foto13.jpeg', 'imagens/foto14.jpeg', 'imagens/foto15.jpeg'
+      'imagens/foto13.jpeg', 'imagens/foto14.jpeg', 'imagens/foto15.jpeg',
+      'imagens/foto16.jpeg', 'imagens/foto17.jpeg', 'imagens/foto18.jpeg',
+      'imagens/foto19.jpeg', 'imagens/foto20.jpeg', 'imagens/foto21.jpeg',
+      'imagens/foto22.jpeg', 'imagens/foto23.jpeg', 'imagens/foto24.jpeg',
+      'imagens/foto25.jpeg', 'imagens/foto26.jpeg', 'imagens/foto27.jpeg'
     ];
 
     /* ---------- FUNDO EM MOSAICO (6 fotos por vez, sem repetir, transição fluida) ---------- */
